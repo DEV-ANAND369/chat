@@ -1,17 +1,22 @@
 # Use the official PHP image from Docker Hub
 FROM php:8.1-apache
 
-# Install additional PHP extensions
+# Set environment variables for non-interactive apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update and install dependencies
 RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
-    libjpeg-dev \
+    libjpeg62-turbo-dev \
     libpng-dev \
     libfreetype6-dev \
-    libzip-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install mysqli pdo pdo_mysql curl dom openssl mbstring exif gd pcre json fileinfo zip
+    libzip-dev
+
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install mysqli pdo pdo_mysql curl dom openssl mbstring exif gd json fileinfo zip
 
 # Enable mod_rewrite for Apache
 RUN a2enmod rewrite
