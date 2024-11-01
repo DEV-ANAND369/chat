@@ -1,21 +1,23 @@
 # Use the official PHP image from Docker Hub
 FROM php:8.1-apache
 
-# Set environment variables for non-interactive apt
+# Set environment variable for non-interactive apt
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update and install dependencies separately for troubleshooting
-RUN apt-get update && \
-    apt-get install -y libcurl4-openssl-dev && \
-    apt-get install -y libssl-dev && \
-    apt-get install -y libxml2-dev && \
-    apt-get install -y libjpeg62-turbo-dev && \
-    apt-get install -y libpng-dev && \
-    apt-get install -y libfreetype6-dev && \
-    apt-get install -y libzip-dev && \
-    apt-get install -y libonig-dev && \
-    docker-php-ext-configure gd --with-freetype --with-jpeg && \
-    docker-php-ext-install -j$(nproc) gd mysqli pdo pdo_mysql curl dom openssl mbstring exif json fileinfo zip
+# Update and install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    apt-utils \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libonig-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd mysqli pdo pdo_mysql curl dom openssl mbstring exif json fileinfo zip \
+    && rm -rf /var/lib/apt/lists/*
 
 # Enable mod_rewrite for Apache
 RUN a2enmod rewrite
