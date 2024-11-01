@@ -1,9 +1,32 @@
 # Use the official PHP image from Docker Hub
 FROM php:8.0-apache
 
-# Install dependencies and PHP extensions
-RUN apt-get update && apt-get install -y libicu-dev \
-    && docker-php-ext-install mysqli pdo pdo_mysql intl
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libicu-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libzip-dev \
+    libonig-dev \
+    libfreetype6-dev \
+    libimap-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install and enable mysqli, pdo, pdo_mysql, and intl extensions
+RUN docker-php-ext-install mysqli pdo pdo_mysql intl
+
+# Install and enable Exif extension
+RUN docker-php-ext-install exif
+
+# Install and enable GD extension
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd
+
+# Install and enable Zip extension
+RUN docker-php-ext-install zip
+
+# Install and enable IMAP extension
+RUN docker-php-ext-install imap
 
 # Enable mod_rewrite for Apache
 RUN a2enmod rewrite
