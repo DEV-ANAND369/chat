@@ -1,40 +1,22 @@
-FROM php:8.1-apache
+# Use the official PHP image from Docker Hub
+FROM php:8.0-apache
 
-# Set environment variable for non-interactive apt
-ENV DEBIAN_FRONTEND=noninteractive
+# Install dependencies and PHP extensions
+RUN apt-get update && apt-get install -y libicu-dev \
+    && docker-php-ext-install mysqli pdo pdo_mysql intl
 
-# Set the working directory in the container
-WORKDIR /var/www/html
+# Enable mod_rewrite for Apache
+RUN a2enmod rewrite
 
-# Copy the current directory contents into the container at /var/www/html
-COPY . .
+# Copy your application code to the container
+COPY . /var/www/html
 
-# Install system dependencies and PHP extensions
-RUN apt-get update && \
-    apt-get install -y \
-        libjpeg-dev \
-        libpng-dev \
-        libfreetype6-dev \
-        libzip-dev \
-        libonig-dev || { echo "Failed to install dependencies"; exit 1; } && \
-    docker-php-ext-configure gd --with-freetype --with-jpeg || { echo "Failed to configure GD"; exit 1; } && \
-    docker-php-ext-install -j$(nproc) \
-        pdo \
-        pdo_mysql \
-        curl \
-        dom \
-        openssl \
-        mbstring \
-        exif \
-        gd \
-        pcre \
-        json \
-        fileinfo \
-        zip || { echo "Failed to install PHP extensions"; exit 1; } && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Set permissions for Apache
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
-# Expose port 80 to the outside world
+# Expose port 80 for the Apache server
 EXPOSE 80
 
-# Start the Apache server
+# Start the Apache server in the foreground
 CMD ["apache2-foreground"]
