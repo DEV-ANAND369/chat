@@ -13,9 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgd-dev \
     libzip-dev \
     libonig-dev \
-    && docker-php-ext-configure gd \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd mysqli pdo pdo_mysql curl dom openssl mbstring exif json fileinfo zip \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Enable mod_rewrite for Apache
 RUN a2enmod rewrite
