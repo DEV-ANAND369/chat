@@ -1,5 +1,4 @@
-# Use the official PHP 8.1 image from the Docker Hub
-FROM php:8.2-apache
+FROM php:8.1-apache
 
 # Set environment variable for non-interactive apt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -10,32 +9,29 @@ WORKDIR /var/www/html
 # Copy the current directory contents into the container at /var/www/html
 COPY . .
 
-# Enable mod_rewrite for Apache
-RUN a2enmod rewrite
-
 # Install system dependencies and PHP extensions
-RUN apt-get update && apt-get install -y \
-    libjpeg-dev \
-    libpng-dev \
-    libfreetype6-dev \
-    libzip-dev \
-    libonig-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-    pdo \
-    pdo_mysql \
-    curl \
-    dom \
-    openssl \
-    mbstring \
-    exif \
-    gd \
-    pcre \
-    json \
-    fileinfo \
-    zip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y \
+        libjpeg-dev \
+        libpng-dev \
+        libfreetype6-dev \
+        libzip-dev \
+        libonig-dev || { echo "Failed to install dependencies"; exit 1; } && \
+    docker-php-ext-configure gd --with-freetype --with-jpeg || { echo "Failed to configure GD"; exit 1; } && \
+    docker-php-ext-install -j$(nproc) \
+        pdo \
+        pdo_mysql \
+        curl \
+        dom \
+        openssl \
+        mbstring \
+        exif \
+        gd \
+        pcre \
+        json \
+        fileinfo \
+        zip || { echo "Failed to install PHP extensions"; exit 1; } && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Expose port 80 to the outside world
 EXPOSE 80
