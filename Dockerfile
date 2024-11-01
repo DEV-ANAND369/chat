@@ -12,11 +12,9 @@ RUN apt-get update && apt-get install -y \
     libjpeg62-turbo-dev \
     libpng-dev \
     libfreetype6-dev \
-    libzip-dev
-
-# Configure and install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install mysqli pdo pdo_mysql curl dom openssl mbstring exif gd json fileinfo zip
+    libzip-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd mysqli pdo pdo_mysql curl dom openssl mbstring exif json fileinfo zip
 
 # Enable mod_rewrite for Apache
 RUN a2enmod rewrite
